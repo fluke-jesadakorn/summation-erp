@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Private {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  email String @unique
+}
+
+model Blog {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  title   String @unique
+  content String
+}
+
+model Contact {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  email   String @unique
+  message String
+}
+
+model Account {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  type         String // e.g., Asset, Liability, Equity, Revenue, Expense
+  description  String?
+  transactions Transaction[]
+  subAccounts  SubAccount[]
+  balance      Float?
+}
+
+model AccountingPeriod {
+  id          String   @id @default(auto()) @db.ObjectId @map("_id")
+  startDate   DateTime
+  endDate     DateTime
+  status      String // For example: "Open", "Closed"
+  description String?
+  transactions Transaction[]
+}
+
+model Transaction {
+  id                 String            @id @default(auto()) @map("_id") @db.ObjectId
+  date               DateTime
+  amount             Float
+  description        String?
+  accountId          String            @db.ObjectId
+  account            Account           @relation(fields: [accountId], references: [id])
+  AccountingPeriod   AccountingPeriod? @relation(fields: [accountingPeriodId], references: [id])
+  accountingPeriodId String?           @db.ObjectId
+}
+
+model SubAccount {
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  mainAccountId String  @db.ObjectId
+  name          String
+  mainAccount   Account @relation(fields: [mainAccountId], references: [id])
+}
+
+model UserDepartment {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  // Other fields as necessary
+}
+
+model Vendor {
+  vendorId    String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  address     String?
+  createdDate DateTime @default(now())
+  tel         String?
+  juristicId  String?
+  taxId       String?
+  contactAddr String?
+  telContactAddr String?
+  staffId     String?
+}
